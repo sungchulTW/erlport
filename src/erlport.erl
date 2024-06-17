@@ -41,7 +41,8 @@
 -export([
     stop/1,
     call/5,
-    cast/2
+    cast/2,
+    get_port/1
     ]).
 
 %% Behaviour callbacks
@@ -67,6 +68,15 @@
 -type call_options() :: [call_option()].
 
 -export_type([server_instance/0, call_options/0]).
+
+
+%%
+%% @doc get port
+%%
+
+get_port(Pid) ->
+    gen_server:call(Pid, get_port).
+
 
 %%
 %% @doc Stop port protocol
@@ -125,6 +135,10 @@ init(Fun) when is_function(Fun, 0) ->
 handle_call(Call={call, _M, _F, _A, Options}, From, State=#state{})
         when is_list(Options) ->
     send_request(Call, From, Options, State);
+
+handle_call(get_port, _From, State=#state{port=Port}) ->
+    {reply, Port, State};
+
 handle_call(Request, From, State) ->
     Error = {unknown_call, ?MODULE, Request, From},
     {reply, Error, State}.
